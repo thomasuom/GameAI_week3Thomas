@@ -122,11 +122,9 @@ namespace EscapeLab2D // Groups our game scripts together.
 
 
         /// <summary>
-        /// ONTRIGGERENTER2D: Called when the player ENTERS a 2D trigger.
-        /// We use it for collecting cells because each cell is collected once.
+        /// ONTRIGGERENTER2D: Called when the player enters a 2D trigger.
         ///
         /// 'other' is the collider of the object we touched.
-        /// Triggers detect overlap without physically blocking movement.
         /// </summary>
         private void OnTriggerEnter2D(Collider2D other)
         {
@@ -143,7 +141,7 @@ namespace EscapeLab2D // Groups our game scripts together.
                 game.CollectSpecialCell();              // Update the score and cell count.
                 other.gameObject.SetActive(false); // Hide and disable the cell.
             }
-             if (other.CompareTag("Potion"))
+            if (other.CompareTag("Potion"))
             {
                 game.CollectPotion();              // Update the score and cell count.
                 other.gameObject.SetActive(false); // Hide and disable the cell.
@@ -151,38 +149,47 @@ namespace EscapeLab2D // Groups our game scripts together.
             if (other.CompareTag("Poison"))
             {
                 game.CollectPoison();              // Update the score and cell count.
+                if (playerVisual != null)
+                    StartCoroutine(ShakePlayer());
+
                 other.gameObject.SetActive(false); // Hide and disable the cell.
             }
         }
 
 
         /// <summary>
-        /// ONTRIGGERSTAY2D: Called repeatedly during physics updates
-        /// while the player REMAINS inside a trigger.
+        /// ONTRIGGERSTAY2D: Called repeatedly while the player remains inside a trigger.
         ///
-        /// Unlike Enter, Stay keeps checking while objects overlap.
-        /// Useful for repeated Hunter damage and checking the exit.
+        /// Stay keeps checking while objects overlap, allowing repeated Hunter damage
+        /// and repeated exit checks.
         /// </summary>
+    
+       private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (game == null || !game.Playing) return;
+
+        // Check if the player is touching the solid Hunter
+        if (collision.gameObject.CompareTag("Hunter") && Time.time >= nextHitTime)
+        {
+            game.HitPlayer(); // Reduce health through GameManager.
+
+            if (playerVisual != null)
+                StartCoroutine(ShakePlayer());
+
+            nextHitTime = Time.time + secondsBetweenHits;
+        }
+    }
+
+        // Handles trigger-based objects like the Exit (Is Trigger = true)
         private void OnTriggerStay2D(Collider2D other)
         {
             if (game == null || !game.Playing) return;
 
-            // && means AND: both conditions must be true.
-            // Time.time is the elapsed game time in seconds.
-            // >= means greater than or equal to.
-            if (other.CompareTag("Hunter") && Time.time >= nextHitTime)
+            // Check the exit repeatedly while touching it
+            if (other.CompareTag("Exit")) 
             {
-                game.HitPlayer(); // Reduce health through GameManager.
-
-                if (playerVisual != null)
-                    StartCoroutine(ShakePlayer());
-
-                nextHitTime = Time.time + secondsBetweenHits;
+                game.TouchExit();
             }
-
-            // Check the exit repeatedly while touching it.
-            // GameManager decides whether enough cells were collected.
-            if (other.CompareTag("Exit")) game.TouchExit();
         }
 
         [SerializeField] private Transform playerVisual;

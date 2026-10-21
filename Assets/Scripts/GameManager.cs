@@ -315,7 +315,7 @@ namespace EscapeLab2D // Groups our game scripts together.
             // If true, use A; otherwise, use B.
             // This is called the conditional operator.
             GUI.Label(new Rect(28, 20, 245, 150),
-                $"ESCAPE LAB 2D\nCells: {Cells}/{requiredCells}\n" +
+                $"ESCAPE LAB 2D\nCells: {Cells}\n" +
                 $"Special Cells: {SpecialCells}\n" +
                 $"Health: {Health}    Score: {Score}\n" +
                 $"Time: {Mathf.CeilToInt(Mathf.Max(0f, secondsLeft))}s\n" +
