@@ -2,9 +2,9 @@
 
 ## Scope and rationale
 
-Matches the Week 1 slide objectives: reusable project, four central entities (Player, Hunter placeholder, collectables, exit), short repeated runs, a collection goal, timer and health loss, and clear boundaries between movement/input and game rules.
+Matches the project objectives: reusable project, four central entities (Player, Hunters, collectables, exit), short repeated runs, a collection goal, timer and health loss, and clear boundaries between movement/input, AI and game rules.
 
-**Deliberate reduction:** Earlier version used eight gameplay scripts. This teaching version uses **two**, both commented in plain English. The Hunter is only a tagged red trigger in Week 1 and has no AI behaviour. Walls/collectables/exit work through Unity's standard components. OnGUI avoids an introductory Canvas lesson.
+**Deliberate reduction:** Earlier version used eight gameplay scripts. This teaching version uses **three**. The Hunters use simple steering; walls/collectables/exit work through Unity's standard components. OnGUI avoids an introductory Canvas lesson.
 
 ## Suggested class explanation
 
@@ -13,14 +13,14 @@ PlayerController2D senses keyboard input and overlap events, moves the player, t
 ## Three required playtests
 
 1. **Win:** set Required Cells to 3 for a quick test, collect three cells, then enter the exit.
-2. **Health loss:** stand on the stationary Hunter for about three seconds.
+2. **Health loss:** touch a moving Hunter and observe the health loss rate.
 3. **Timeout:** set Game Seconds to 5 and wait.
 
 Restore settings to 10 required cells, 3 health and 180 seconds before distributing further. Check that R restarts after each outcome.
 
-## Next week
+## Extension
 
-Introduce a **third** script for Hunter steering. Do not replace PlayerController2D or GameManager. That lesson is the first opportunity to distinguish a movement command from an AI decision.
+Extend HunterMovement with obstacle avoidance or pathfinding. Keep player movement and game rules in their existing scripts.
 
 ## Reliability notes
 

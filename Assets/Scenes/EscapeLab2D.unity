@@ -332,6 +332,8 @@ Transform:
   - {fileID: 231}
   - {fileID: 235}
   - {fileID: 239}
+  - {fileID: 252}
+  - {fileID: 821545854}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &210
@@ -1727,8 +1729,9 @@ GameObject:
   - component: {fileID: 252}
   - component: {fileID: 253}
   - component: {fileID: 255}
+  - component: {fileID: 256}
   m_Layer: 0
-  m_Name: HUNTER - stationary Week 01
+  m_Name: HUNTER - AI
   m_TagString: Hunter
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1742,12 +1745,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 251}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 3, y: 3.4, z: 0}
   m_LocalScale: {x: 2.5, y: 2.5, z: 2.0833333}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 209}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &253
 SpriteRenderer:
@@ -1843,8 +1846,24 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Radius: 0.55
+  m_Offset: {x: 0, y: -0.062142324}
+  m_Radius: 0.45614105
+--- !u!114 &256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04a0679faab7bf4f8341273638a2316, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HunterMovement
+  player: {fileID: 246}
+  maxSpeed: 5
+  detectionRadius: 3
+  slowingRadius: 2
 --- !u!1 &258
 GameObject:
   m_ObjectHideFlags: 0
@@ -3773,8 +3792,9 @@ GameObject:
   - component: {fileID: 821545854}
   - component: {fileID: 821545853}
   - component: {fileID: 821545852}
+  - component: {fileID: 821545855}
   m_Layer: 0
-  m_Name: HUNTER - stationary Week 01 (1)
+  m_Name: HUNTER 2 - AI
   m_TagString: Hunter
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3814,8 +3834,8 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Radius: 0.55
+  m_Offset: {x: -0.0044441223, y: -0.022398138}
+  m_Radius: 0.464253
 --- !u!212 &821545853
 SpriteRenderer:
   serializedVersion: 3
@@ -3884,13 +3904,29 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 821545851}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10.27, y: -0.78, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -10.27, y: -0.66, z: 0}
   m_LocalScale: {x: 2.5, y: 2.5, z: 2.0833333}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 209}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &821545855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 821545851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04a0679faab7bf4f8341273638a2316, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HunterMovement
+  player: {fileID: 246}
+  maxSpeed: 8
+  detectionRadius: 5
+  slowingRadius: 2
 --- !u!1 &829230616
 GameObject:
   m_ObjectHideFlags: 0
@@ -4121,8 +4157,6 @@ SceneRoots:
   - {fileID: 209}
   - {fileID: 243}
   - {fileID: 246}
-  - {fileID: 252}
-  - {fileID: 821545854}
   - {fileID: 259}
   - {fileID: 311}
   - {fileID: 316}

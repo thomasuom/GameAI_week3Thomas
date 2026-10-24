@@ -8,12 +8,13 @@ This is **a 2D game**, not a 3D game. The X axis means left/right. The Y axis me
 
 ## What you should understand
 
-There are **only two gameplay scripts**:
+There are **three gameplay scripts**:
 
 1. **PlayerController2D.cs** moves the player and detects what the player touches.
 2. **GameManager.cs** stores the rules and determines whether the player has won or lost.
+3. **HunterMovement.cs** steers the Hunters toward the player nearby and lets them wander farther away.
 
-The walls, the Hunter, collectables and exit use components already included in Unity rather than their own scripts.
+The walls, collectables and exit use components already included in Unity rather than their own scripts.
 
 ## PlayerController2D.cs: read the code in this order
 
@@ -24,6 +25,10 @@ The walls, the Hunter, collectables and exit use components already included in 
 | `FixedUpdate()` | Move the Rigidbody2D using Unity's physics clock. |
 | `OnTriggerEnter2D()` | When you first touch a gold cell, tell the manager and hide that cell. |
 | `OnTriggerStay2D()` | While touching the Hunter, lose health at a controlled rate; while touching the exit, check if you can escape. |
+
+## HunterMovement.cs
+
+The Hunter moves in the scene's XY plane. It wanders when the player is outside its detection radius and uses an arrive behavior to slow down near the player. Before moving, it casts against non-trigger colliders so it cannot cross walls.
 
 **Important terms:**
 
@@ -56,9 +61,9 @@ The walls, the Hunter, collectables and exit use components already included in 
 | 15-35 min | Read `PlayerController2D.cs` and trace what happens when W is pressed. |
 | 35-55 min | Read `GameManager.cs` and trace what happens after collecting a cell. |
 | 55-75 min | Play the game. Win once. Identify the win condition. |
-| 75-90 min | Stand on the Hunter and observe the health loss. Then lose by time running out. |
+| 75-90 min | Observe the Hunter chase and navigate along walls. Touch it to observe health loss, then lose by time running out. |
 | 90-105 min | Change `Required Cells` in the Inspector to 3. Test again. |
-| 105-120 min | Explain which method Week 2's Hunter steering code would need to add. |
+| 105-120 min | Explain how the Hunter's steering and wall checks work together. |
 
 ## Three experiments (no new scripts)
 
@@ -73,9 +78,10 @@ The walls, the Hunter, collectables and exit use components already included in 
 - [ ] Gold cells disappear when touched.
 - [ ] Collecting cells updates the count and score.
 - [ ] I can only escape after the exit unlocks.
-- [ ] The Hunter reduces health on contact, even though it cannot move yet.
+- [ ] The Hunters pursue me nearby and do not pass through walls.
+- [ ] The Hunter reduces health on contact.
 - [ ] The timer can cause a loss.
 - [ ] Pressing R after a game ends restarts a fresh run.
 - [ ] I can explain which script handles input and which script handles rules.
 
-**Reflection:** Why might a Hunter that becomes intelligent next week call movement code, rather than storing the score and timer itself?
+**Reflection:** Why might the Hunter movement script avoid storing the score and timer itself?
