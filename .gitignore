@@ -13,3 +13,5 @@
 # Standalone game-rule checks (not Unity assets).
 /Tools/Level3Checks/bin/
 /Tools/Level3Checks/obj/
+/Tools/SteeringChecks/bin/
+/Tools/SteeringChecks/obj/
