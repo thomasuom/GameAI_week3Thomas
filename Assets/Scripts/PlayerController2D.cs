@@ -69,7 +69,13 @@ namespace EscapeLab2D // Groups our game scripts together.
 
             // Stop if GameManager is missing OR the game is not running.
             // == means equal to, || means OR, ! means NOT.
-            if (game == null || !game.Playing) return;
+            if (game == null || !game.Playing)
+            {
+                // A Shift release during pause must not leave sprint latched on.
+                powerUp = 0f;
+                sprinting = false;
+                return;
+            }
 
             
             if (Input.GetKeyDown(KeyCode.LeftShift) && Time.time >= nextPowerUpTime)
@@ -114,6 +120,9 @@ namespace EscapeLab2D // Groups our game scripts together.
         /// </summary>
         private void FixedUpdate()
         {
+            // Do not apply movement after pausing or ending a round.
+            if (game == null || !game.Playing) return;
+
             // Distance = Direction * Speed * Time.
             // fixedDeltaTime is the duration of one physics step.
             // MovePosition asks Unity's 2D physics system to move the player.

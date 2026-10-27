@@ -129,6 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 202}
   - component: {fileID: 203}
+  - component: {fileID: 900000001}
   m_Layer: 0
   m_Name: Main Camera (orthographic 2D)
   m_TagString: MainCamera
@@ -3216,6 +3217,7 @@ GameObject:
   m_Component:
   - component: {fileID: 316}
   - component: {fileID: 317}
+  - component: {fileID: 900000002}
   m_Layer: 0
   m_Name: GAME MANAGER - rules, score, timer
   m_TagString: Untagged
@@ -3255,6 +3257,10 @@ MonoBehaviour:
   gameSeconds: 100
   exitRenderer: {fileID: 312}
   unlockedExitSprite: {fileID: 21300000, guid: 4133f4942b395cabb6b96d7cbd854f4d, type: 3}
+  collectSound: {fileID: 8300000, guid: ee58337fdbd74d7b86a0695cf09a4a0d, type: 3}
+  damageSound: {fileID: 8300000, guid: 4f076db865704ef09bcc7d330a033b97, type: 3}
+  unlockSound: {fileID: 8300000, guid: 56081326829c473f965ec6e97a16498c, type: 3}
+  winSound: {fileID: 8300000, guid: 7e1b7ca2563f48b28503386f48133359, type: 3}
 --- !u!1 &52458409
 GameObject:
   m_ObjectHideFlags: 0
@@ -4162,3 +4168,38 @@ SceneRoots:
   - {fileID: 316}
   - {fileID: 173795729}
   - {fileID: 328869057}
+--- !u!81 &900000001
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 201}
+  m_Enabled: 1
+--- !u!82 &900000002
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 315}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 0.65
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
