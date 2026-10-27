@@ -86,4 +86,5 @@ The cloud workspace has no Unity Editor, so actual Unity compilation, rendering,
 audio playback, physics and Play-mode behaviour have NOT been verified here.
 The check project is outside Assets and does not become part of the game.
 
-Hunter steering/pathfinding belongs to Level 4 and was not rewritten for Level 3.
+The original Level 3 delivery did not rewrite Hunter steering. Subsequent work
+on Thomas's assigned steering tasks is described in STEERING_TASKS.md.

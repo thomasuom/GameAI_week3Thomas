@@ -1,5 +1,9 @@
 # Escape Lab 2D — Level 3
 
+**Next stage:** Thomas's steering tasks **1, 4, 7, 10, 13 and 16** are implemented
+on top of this version. See [STEERING_TASKS.md](STEERING_TASKS.md) for the task
+checklist, demo setup and teammate integration points.
+
 Unity 6 project with the five **Build Game Features** tasks completed:
 
 - Collection, damage, unlock and win sounds.
