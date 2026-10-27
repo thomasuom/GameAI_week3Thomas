@@ -117,6 +117,14 @@ internal static class Program
             var h=Hunter(HunterBehaviour.BasicSeek);Set(h,"maxSpeed",8f);Set(h,"player",Point(10,0));
             Step(h,0.25f);Near(2,Physics2D.LastCastDistance);True(h.transform.position.x<0.91f);
         });
+        Check("10: diagonal contact keeps its sliding component with an artificial start normal", () =>
+        {
+            var wall=new Collider2D {ClosestPointResult=p=>new Vector2(0,p.y)};
+            Physics2D.CastResults=(p,d,len)=>new[]{Hit(wall,0,-d)};
+            var h=Hunter(HunterBehaviour.BasicSeek);h.transform.position=new Vector2(1,0);
+            Set(h,"player",Point(0,10));Step(h);
+            Near(1,h.transform.position.x);True(h.transform.position.y>0.4f);
+        });
         Check("13: patrol advances within a radius without waiting for an exact point", () =>
         {
             var h=Hunter(HunterBehaviour.SmoothPatrol);
@@ -210,10 +218,66 @@ internal static class Program
             Call(a,"OnDisable");Call(a,"OnEnable");Step(b);Step(a);
             True(b.transform.position.x<0);True(a.transform.position.x>0);
         });
-        Check("the inherited near-player response is retained in ExistingDetection mode", () =>
+        Check("existing detection targets the player instead of the arrival demo point", () =>
         {
             var h=Hunter(HunterBehaviour.ExistingDetection);Set(h,"player",Point(1,0));
             Set(h,"arrivalTarget",Point(0,10));Step(h);True(h.Velocity.x>0);Near(0,h.Velocity.y);
+        });
+        Check("nearby players interrupt idle patrol and leaving resumes it", () =>
+        {
+            var h=Hunter(HunterBehaviour.ExistingDetection);Set(h,"patrolWhenIdle",true);
+            Set(h,"player",Point(20,0));h.SetPatrolWaypoints(new[]{Point(0,10)});Step(h);
+            True(h.MovementStatus.Contains("Patrolling"));True(h.Velocity.y>0);
+            Set(h,"player",Point(3,0));Step(h);
+            Equal("Chasing player",h.MovementStatus);True(h.Velocity.x>0);
+            Set(h,"player",Point(20,0));Step(h);True(h.MovementStatus.Contains("Patrolling"));
+        });
+        Check("pure SmoothPatrol remains available for the task 13 demonstration", () =>
+        {
+            var h=Hunter(HunterBehaviour.SmoothPatrol);Set(h,"player",Point(0,1));
+            h.SetPatrolWaypoints(new[]{Point(10,0)});Step(h);
+            True(h.Velocity.x>0);Near(0,h.Velocity.y);
+        });
+        Check("10: a blocked hunter makes a bounded recovery move away from a wall", () =>
+        {
+            var wall=new Collider2D {ClosestPointResult=p=>new Vector2(0,p.y)};
+            Physics2D.CastResults=(p,d,len)=>new[]{Hit(wall,0,-d)};
+            var h=Hunter(HunterBehaviour.BasicSeek);h.transform.position=new Vector2(1,0);
+            Set(h,"player",Point(-10,0));Set(h,"obstacleAvoidance",true);
+            for(int i=0;i<6;i++)Step(h);
+            True(h.transform.position.x>1);True(h.MovementStatus.Contains("Recovering"));
+        });
+        Check("10: a blocked corner recovers into the free direction", () =>
+        {
+            var left=new Collider2D {ClosestPointResult=p=>new Vector2(0,p.y)};
+            var top=new Collider2D {ClosestPointResult=p=>new Vector2(p.x,2)};
+            Physics2D.CastResults=(p,d,len)=>new[]{Hit(left,0,-d),Hit(top,0,-d)};
+            var h=Hunter(HunterBehaviour.BasicSeek);h.transform.position=new Vector2(1,1);
+            Set(h,"player",Point(-10,10));Set(h,"obstacleAvoidance",true);
+            for(int i=0;i<6;i++)Step(h);
+            True(h.transform.position.x>1);True(h.transform.position.y<1);
+        });
+        Check("10: a start inside a box wall can recover without teleporting", () =>
+        {
+            var wall=new Collider2D {Radius=2,ClosestPointResult=p=>p};
+            Physics2D.CastResults=(p,d,len)=>new[]{Hit(wall,0,-d)};
+            var h=Hunter(HunterBehaviour.BasicSeek);Set(h,"player",Point(10,0));
+            Set(h,"obstacleAvoidance",true);
+            for(int i=0;i<6;i++)Step(h);
+            True(h.transform.position.x<0);True(((Vector2)h.transform.position).magnitude<3);
+        });
+        Check("04: valid arrival stops do not trigger wall recovery", () =>
+        {
+            var h=Hunter(HunterBehaviour.Arrival);Set(h,"arrivalTarget",Point(0,0));
+            Set(h,"obstacleAvoidance",true);for(int i=0;i<20;i++)Step(h);
+            Near(Vector2.zero,h.transform.position);True(!h.MovementStatus.Contains("Recovering"));
+        });
+        Check("chasing resumes when a contacted player moves away", () =>
+        {
+            var h=Hunter(HunterBehaviour.ExistingDetection);h.transform.position=new Vector2(1,0);
+            Set(h,"player",Point(1,0));Step(h);Near(Vector2.zero,h.Velocity);
+            Set(h,"player",Point(3,0));Step(h);
+            Equal("Chasing player",h.MovementStatus);True(h.transform.position.x>1);
         });
         Console.WriteLine($"{passed} steering checks passed. Real Unity rendering and physics still need Play-mode checks.");
     }

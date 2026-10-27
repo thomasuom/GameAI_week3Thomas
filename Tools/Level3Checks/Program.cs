@@ -130,6 +130,7 @@ internal static class Program
         {
             var g = NewManager(); var damage = new AudioClip(); Set(g, "damageSound", damage);
             g.CollectPoison(); Equal(1, g.Health);
+            True(g.Playing); // Non-fatal damage must not stop Hunter movement.
             Equal(1, g.GetComponent<AudioSource>().Played.Count(x => x == damage));
         });
         Check("restart while paused restores time/audio and reloads the scene", () =>

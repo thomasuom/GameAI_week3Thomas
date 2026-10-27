@@ -1,8 +1,10 @@
 # Level 3 validation
 
-The subsequent steering stage adds 32 helper/controller checks and a configured
+The subsequent steering stage adds 40 helper/controller checks and a configured
 wall layer, arrival target and patrol points. See STEERING_TASKS.md for scope and
-the required Unity Play-mode checks. The following records the Level 3 baseline.
+the required Unity Play-mode checks. Both saved Hunters chase nearby players;
+contact sliding, blocked-wall recovery and idle/chase transitions have standalone
+regressions. The following records the Level 3 baseline.
 
 Baseline: laptop-unity-work, commit be6ab8b. Scope: PDF tasks 10–14.
 

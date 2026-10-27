@@ -13,6 +13,7 @@ public class HunterMovement : MonoBehaviour
     [Min(0f)] [SerializeField] private float maxSpeed = 5f;
     [Min(0f)] [SerializeField] private float maxAcceleration = 12f;
     [SerializeField] private float detectionRadius = 10f;
+    [SerializeField] private bool patrolWhenIdle;
 
     [Header("04 - Arrival: assign a point, or use the player")]
     [SerializeField] private Transform arrivalTarget;
@@ -38,6 +39,9 @@ public class HunterMovement : MonoBehaviour
     [Min(0.1f)] [SerializeField] private float separationRadius = 3f;
     [Min(0f)] [SerializeField] private float separationWeight = 1.5f;
 
+    [Header("Runtime status - watch during Play mode")]
+    [SerializeField] private string movementStatus = "Ready";
+
     private const float WallClearance = 0.04f;
     private static readonly List<HunterMovement> hunters = new List<HunterMovement>();
     private static int nextHunterId;
@@ -56,11 +60,17 @@ public class HunterMovement : MonoBehaviour
     private Vector2 avoidanceNormal;
     private float avoidanceSide = 1f;
     private float avoidUntil;
+    private float blockedSeconds;
+    private Vector2 blockingNormals;
+    private Vector2 lastBlockingNormal;
+    private Vector2 recoveryDirection;
+    private float recoveryUntil;
 
     public int CurrentWaypointIndex => waypointIndex;
     public Vector2 Velocity => velocity;
     public Vector2 WanderTarget => wanderTarget;
     public bool HasWanderTarget => hasWanderTarget;
+    public string MovementStatus => movementStatus;
 
     private void Awake()
     {
@@ -77,12 +87,18 @@ public class HunterMovement : MonoBehaviour
             hunterId = ++nextHunterId;
             hunters.Add(this);
         }
+        movementStatus = "Ready";
     }
 
     private void OnDisable()
     {
         hunters.Remove(this);
         velocity = Vector2.zero;
+        blockedSeconds = 0f;
+        recoveryUntil = 0f;
+        avoidUntil = 0f;
+        avoidedWall = null;
+        movementStatus = "Disabled";
     }
 
     private void ConfigureObstacleFilter()
@@ -97,16 +113,27 @@ public class HunterMovement : MonoBehaviour
 
     private void Update()
     {
-        if (Time.deltaTime <= 0f || (game != null && !game.Playing)) return;
+        if (Time.deltaTime <= 0f || (game != null && !game.Playing))
+        {
+            movementStatus = "Paused or round finished";
+            return;
+        }
         ConfigureObstacleFilter(); // Inspector layer changes also work during a demonstration.
         Vector2 desired = ChooseVelocity();
 
-        // Task 16 adds only local repulsion; it does not implement Surround (task 17).
-        if (separation)
-            desired = Vector2.ClampMagnitude(desired + SeparationVelocity() * separationWeight, maxSpeed);
-
-        // Task 10 takes priority when the single forward ray sees a wall.
-        if (obstacleAvoidance) desired = AvoidObstacles(desired);
+        if (Time.time < recoveryUntil)
+        {
+            movementStatus = "Recovering from wall";
+            desired = recoveryDirection * maxSpeed;
+        }
+        else
+        {
+            // Task 16 adds only local repulsion; it does not implement Surround (task 17).
+            if (separation)
+                desired = Vector2.ClampMagnitude(desired + SeparationVelocity() * separationWeight, maxSpeed);
+            // Task 10 takes priority when the single forward ray sees a wall.
+            if (obstacleAvoidance) desired = AvoidObstacles(desired);
+        }
         velocity = behaviour == HunterBehaviour.BasicSeek
             ? Vector2.ClampMagnitude(desired, maxSpeed)
             : SteeringMath.ApplySteering(velocity, desired, maxAcceleration, maxSpeed, Time.deltaTime);
@@ -114,11 +141,31 @@ public class HunterMovement : MonoBehaviour
         Vector2 displacement = MoveWithoutCrossingWalls(velocity * Time.deltaTime);
         transform.position += (Vector3)displacement;
         velocity = displacement / Time.deltaTime;
+        if (desired.sqrMagnitude > 0.01f && displacement.sqrMagnitude < 0.000001f)
+        {
+            blockedSeconds += Time.deltaTime;
+            movementStatus = "Blocked on wall";
+            if (obstacleAvoidance && blockedSeconds >= 0.4f && blockingNormals.sqrMagnitude > 0.001f)
+            {
+                // Back out of a blocked corner, trying the opposite wall-following side.
+                avoidanceSide = -avoidanceSide;
+                Vector2 tangent = new Vector2(-lastBlockingNormal.y, lastBlockingNormal.x) * avoidanceSide;
+                recoveryDirection = (blockingNormals.normalized + tangent * 0.5f).normalized;
+                recoveryUntil = Time.time + 0.65f;
+                avoidedWall = null;
+                hasWanderTarget = false;
+                nextWanderTargetTime = 0f;
+                blockedSeconds = 0f;
+                movementStatus = "Recovering from wall";
+            }
+        }
+        else blockedSeconds = 0f;
     }
 
     private Vector2 ChooseVelocity()
     {
         Vector2 position = transform.position;
+        movementStatus = behaviour.ToString();
         switch (behaviour)
         {
             case HunterBehaviour.BasicSeek: // 01: immediate, direct movement.
@@ -130,9 +177,18 @@ public class HunterMovement : MonoBehaviour
             case HunterBehaviour.SmoothPatrol: // 13: radius-based waypoint changes.
                 return PatrolVelocity();
             case HunterBehaviour.ExistingDetection:
-                // Preserve the original near-player switch; task 08 belongs to a teammate.
+                // Reuse the existing near-player switch for ordinary gameplay.
                 if (player != null && Vector2.Distance(position, player.position) < detectionRadius)
-                    return ArriveAt(player.position);
+                {
+                    movementStatus = "Chasing player";
+                    return SteeringMath.SeekVelocity(position, player.position, maxSpeed);
+                }
+                if (patrolWhenIdle)
+                {
+                    movementStatus = "Patrolling while player is far away";
+                    return PatrolVelocity();
+                }
+                movementStatus = "Wandering while player is far away";
                 return WanderVelocity();
             default: // 07: choose random points and seek each in turn.
                 return WanderVelocity();
@@ -171,6 +227,7 @@ public class HunterMovement : MonoBehaviour
         }
         // Reselect unreachable/stalled targets; do not keep pushing toward one forever.
         nextWanderTargetTime = Time.time + (hasWanderTarget ? wanderRetargetSeconds : 0.25f);
+        if (!hasWanderTarget) movementStatus = "No free wander target - retrying";
     }
 
     public void SetPatrolWaypoints(Transform[] waypoints)
@@ -237,7 +294,10 @@ public class HunterMovement : MonoBehaviour
         }
         // Briefly keep the same turn, avoiding left/right flip-flopping at contact.
         if (avoidedWall != null && Time.time < avoidUntil)
+        {
+            movementStatus = "Avoiding wall";
             return SteeringMath.AvoidanceVelocity(avoidanceNormal, avoidanceSide, maxSpeed);
+        }
         avoidedWall = null;
         return desired;
     }
@@ -253,14 +313,34 @@ public class HunterMovement : MonoBehaviour
             if (hit.distance <= 0.0001f)
             {
                 Vector2 outward = origin - hit.collider.ClosestPoint(origin);
+                bool insideWall = outward.sqrMagnitude <= 0.000001f;
+                Vector2 normal = insideWall ? NearestBoundsExit(hit.collider.bounds, origin) : outward.normalized;
                 // A cast starting at contact may report an artificial normal opposite
                 // travel. Allow travel away from, or parallel to, the actual wall.
-                if (outward.sqrMagnitude > 0.000001f &&
-                    Vector2.Dot(direction, outward.normalized) >= -0.0001f) continue;
+                float outwardMotion = Vector2.Dot(direction, normal);
+                if ((!insideWall && outwardMotion >= -0.0001f) ||
+                    (insideWall && outwardMotion > 0.0001f)) continue;
+                // Preserve tangential movement when the query supplies -direction
+                // for a starting overlap, instead of the actual wall normal.
+                hit.normal = normal;
             }
             if (!found || hit.distance < closest.distance) { closest = hit; found = true; }
         }
         return found;
+    }
+
+    private static Vector2 NearestBoundsExit(Bounds bounds, Vector2 point)
+    {
+        // Recovery for an invalid start inside one of this level's box walls.
+        float nearest = point.x - (bounds.center.x - bounds.extents.x);
+        Vector2 normal = Vector2.left;
+        float right = bounds.center.x + bounds.extents.x - point.x;
+        if (right < nearest) { nearest = right; normal = Vector2.right; }
+        float bottom = point.y - (bounds.center.y - bounds.extents.y);
+        if (bottom < nearest) { nearest = bottom; normal = Vector2.down; }
+        float top = bounds.center.y + bounds.extents.y - point.y;
+        if (top < nearest) normal = Vector2.up;
+        return normal;
     }
 
     private Vector2 MoveWithoutCrossingWalls(Vector2 displacement)
@@ -268,6 +348,7 @@ public class HunterMovement : MonoBehaviour
         Vector2 origin = Centre;
         Vector2 position = origin;
         Vector2 remaining = displacement;
+        blockingNormals = Vector2.zero;
         for (int i = 0; i < 2 && remaining.sqrMagnitude > 0.000001f; i++)
         {
             float distance = remaining.magnitude;
@@ -279,6 +360,8 @@ public class HunterMovement : MonoBehaviour
                 break;
             }
             Vector2 travelled = direction * Mathf.Max(0f, hit.distance - WallClearance);
+            blockingNormals += hit.normal;
+            lastBlockingNormal = hit.normal;
             position += travelled;
             remaining -= travelled;
             float intoWall = Vector2.Dot(remaining, hit.normal);

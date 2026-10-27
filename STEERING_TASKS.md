@@ -29,10 +29,12 @@ The existing hunter-ai-steering branch is not merged.
 ## Scene setup already included
 
 - Keep using Assets/Scenes/EscapeLab2D.unity.
-- **HUNTER - AI** uses ExistingDetection: the original near-player arrival response,
-  with point-based wandering outside detection range.
-- **HUNTER 2 - AI** uses SmoothPatrol and four assigned points in the clear left
-  side of the arena.
+- Both Hunters use **ExistingDetection** and chase the player within 6 world
+  units. Ordinary chasing uses Seek; Arrival remains a separate task 04 demo.
+- **HUNTER - AI** (right) wanders toward random points outside detection range.
+- **HUNTER 2 - AI** (left) has **Patrol When Idle** enabled and follows four
+  assigned points while the player is far away. Nearby players interrupt patrol;
+  it resumes when they leave detection range.
 - **STEERING PRACTICE POINTS** contains the Arrival target and patrol points.
 - Layer 6 is **Walls**, assigned to the nine solid wall/obstacle objects.
   Hunter queries ignore trigger pickups, player and Hunter colliders.
@@ -42,6 +44,8 @@ The existing hunter-ai-steering branch is not merged.
 Both Hunters still use the existing HunterMovement component and script GUID.
 Enable or disable Obstacle Avoidance and Separation in its Inspector to isolate
 a behaviour. The passive shape sweep still prevents movement through solid walls.
+During Play mode, **Movement Status** in the Inspector shows chasing, wandering,
+patrolling, avoidance, blocked contact, recovery, or a paused/finished round.
 
 ## Test one task at a time in Unity
 
@@ -77,12 +81,19 @@ should turn along/away from the detected wall, and its shape sweep prevents cros
 Only one forward sensing ray is used; left/right feelers belong to task 11.
 The shape sweep is collision safety, not extra sensing feelers.
 
+Starting overlaps use the actual wall-facing normal rather than the query's
+artificial opposite-travel normal, preserving movement along the wall. If a
+Hunter remains blocked for 0.4 seconds, it briefly backs away and tries the other
+turning direction. This recovery respects the same swept collision checks.
+
 This is local avoidance, not navigation. It does not guarantee a route through
 every maze or out of enclosed corners. A* belongs to the next navigation stage.
 
 ### 13 — Smooth Patrol
 
-HUNTER 2 - AI is already set to **SmoothPatrol** with four waypoints.
+Select HUNTER 2 - AI and choose **SmoothPatrol** to isolate task 13. Its four
+waypoints are already assigned. This pure mode keeps patrolling even near the
+player; use **ExistingDetection** for normal patrol-and-chase gameplay.
 Watch the Hunter turn toward the next point before reaching the exact position.
 It keeps moving through turns rather than stopping at each point.
 Increase Waypoint Radius for earlier turns; decrease it for tighter point tracking.
@@ -109,6 +120,9 @@ This keeps Hunters apart; it does not implement task 17's surround/orbit positio
 - [ ] P freezes Hunters and the timer; resuming does not jump their positions.
 - [ ] After winning/losing, Hunters stop and R starts a normal fresh run.
 - [ ] Enable both Hunters and verify they retain independent targets/waypoint state.
+- [ ] Approach each Hunter and verify it chases; leave range and verify its idle behaviour resumes.
+- [ ] Non-fatal contact damage leaves the timer and both Hunters running.
+- [ ] A diagonal wall contact allows sliding; a blocked corner triggers a brief recovery.
 - [ ] Check the Console and inspect the Walls mask if a wall is not detected.
 - [ ] Restore the saved demo settings after temporary Play-mode experiments.
 
@@ -123,14 +137,17 @@ This keeps Hunters apart; it does not implement task 17's surround/orbit positio
 - **PatrolVelocity** changes the point index while within the waypoint radius.
 - **AvoidObstacles** uses one ray and briefly keeps a chosen turn to avoid flipping.
 - **MoveWithoutCrossingWalls** retains collision safety, adds clearance, uses the
-  actual collider centre, and allows parallel movement at zero-distance contact.
+  actual collider centre, corrects starting-contact normals and preserves sliding.
+  Blocked movement triggers a short outward recovery with collision safety active.
 
 ## Verification
 
-32 standalone C# checks passed against the real helper and controller code with
+40 standalone C# checks passed against the real helper and controller code with
 test-only Unity/physics stand-ins. They cover direct seek, arrival simulation,
 wandering bounds/retries, one-ray priority, contact sliding, full-distance sweeps,
-multi-lap patrol, separation, active registration and Level 3 pause gating.
+multi-lap patrol, separation, active registration, Level 3 pause gating, idle/chase
+transitions, recovery from wall/corner contacts and resuming chase after contact.
+The separate 21 Level 3 checks also verify that non-fatal damage keeps the round active.
 
 Hunters use local registration numbers for overlap tie-breaking and turn choice.
 There is no dependency on Unity's obsolete GetInstanceID API. The test stand-in
