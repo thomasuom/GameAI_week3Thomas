@@ -159,6 +159,37 @@ internal static class Program
             g.TogglePause(); g.HitPlayer(); g.HitPlayer(); g.HitPlayer(); Call(g, "OnGUI");
             Call(g, "OnDestroy");
         });
+        Check("HUD stays compact and inside common game resolutions", () =>
+        {
+            int[,] sizes = { { 960, 540 }, { 1280, 720 }, { 1920, 1080 },
+                { 2560, 1440 }, { 3440, 1440 }, { 1024, 768 } };
+            for (int i = 0; i < sizes.GetLength(0); i++)
+            {
+                Screen.width = sizes[i, 0]; Screen.height = sizes[i, 1];
+                var g = NewManager(); GUI.Draws.Clear(); Call(g, "OnGUI");
+                Rect hud = GUI.Draws[0].Bounds;
+                True(hud.width < Screen.width * 0.24f);
+                True(hud.height < Screen.height * 0.22f);
+                foreach (var draw in GUI.Draws)
+                {
+                    Rect r = draw.Bounds;
+                    True(r.x >= 0 && r.y >= 0);
+                    True(r.x + r.width <= Screen.width + 0.01f);
+                    True(r.y + r.height <= Screen.height + 0.01f);
+                }
+                Call(g, "OnDestroy");
+            }
+        });
+        Check("control hints remain visible when a zoomed QHD view crops the bottom", () =>
+        {
+            Screen.width = 2560; Screen.height = 1440;
+            var g = NewManager(); GUI.Draws.Clear(); Call(g, "OnGUI");
+            var hints = GUI.Draws.Single(x => x.Text != null && x.Text.Contains("WASD"));
+            True(hints.Text.Contains("P: pause/resume") && hints.Text.Contains("R: restart"));
+            True(hints.Bounds.y + hints.Bounds.height < Screen.height * 0.85f);
+            Call(g, "OnDestroy");
+            Screen.width = 1920; Screen.height = 1080;
+        });
         Console.WriteLine($"{passed} checks passed. Test doubles do not validate Unity rendering, audio or physics.");
     }
 

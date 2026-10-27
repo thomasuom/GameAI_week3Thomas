@@ -16,6 +16,9 @@ Controls: WASD/arrows move, Left Shift sprints, P pauses/resumes, R restarts.
 Pause or finish a round to see the Easy, Medium and Hard buttons.
 Selecting a difficulty starts a fresh round and saves that choice.
 
+The HUD uses a compact layout. Keyboard hints sit beneath it rather than at the
+bottom edge, so a zoomed fixed-resolution Game view does not crop the hints away.
+
 ## What each task adds
 
 | Task | Implemented behaviour |
@@ -71,9 +74,10 @@ Game Manager field. The built-in audio module is enabled; no paid AI service is 
 
 ## Automated checks and limits
 
-The included Tools/Level3Checks project has 19 checks covering the real rule code
+The included Tools/Level3Checks project has 21 checks covering the real rule code
 and GameManager using test-only stand-ins for Unity services. It also compiles the
-HUD code against those stand-ins. Run with a .NET 8 SDK:
+HUD code against those stand-ins. Layout checks cover six common resolutions and
+control visibility when a zoomed QHD Game view crops the bottom. Run with a .NET 8 SDK:
 
     dotnet run --project Tools/Level3Checks/Level3Checks.csproj
 

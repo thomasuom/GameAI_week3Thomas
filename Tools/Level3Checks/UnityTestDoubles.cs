@@ -90,7 +90,9 @@ namespace UnityEngine
     public struct Quaternion { public static Quaternion identity => new Quaternion(); }
     public struct Matrix4x4
     {
-        public static Matrix4x4 TRS(Vector3 position, Quaternion rotation, Vector3 scale) { return new Matrix4x4(); }
+        public float ScaleX, ScaleY;
+        public static Matrix4x4 TRS(Vector3 position, Quaternion rotation, Vector3 scale)
+        { return new Matrix4x4 { ScaleX=scale.x, ScaleY=scale.y }; }
     }
     public struct Rect
     {
@@ -124,13 +126,21 @@ namespace UnityEngine
     public static class Screen { public static int width = 1920, height = 1080; }
     public static class GUI
     {
+        public sealed class DrawCall { public Rect Bounds; public string Text; }
+        public static readonly List<DrawCall> Draws = new List<DrawCall>();
         public static Matrix4x4 matrix;
         public static Color color = Color.white;
         public static bool enabled = true;
         public static GUISkin skin = new GUISkin();
-        public static void Label(Rect rect, string text, GUIStyle style) { }
-        public static void DrawTexture(Rect rect, Texture2D texture) { }
-        public static bool Button(Rect rect, string text, GUIStyle style) { return false; }
+        public static void Label(Rect rect, string text, GUIStyle style) { Record(rect, text); }
+        public static void DrawTexture(Rect rect, Texture2D texture) { Record(rect, null); }
+        public static bool Button(Rect rect, string text, GUIStyle style)
+        { Record(rect, text); return false; }
+        private static void Record(Rect rect, string text)
+        {
+            Draws.Add(new DrawCall { Text=text, Bounds=new Rect(rect.x*matrix.ScaleX,
+                rect.y*matrix.ScaleY, rect.width*matrix.ScaleX, rect.height*matrix.ScaleY) });
+        }
     }
 }
 namespace UnityEngine.SceneManagement

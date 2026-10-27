@@ -17,7 +17,8 @@ namespace EscapeLab2D
         {
             if (title == null) CreateStyles();
             if (heart == null) CreateHeart();
-            float scale = Mathf.Min(Screen.width / 960f, Screen.height / 540f);
+            // A larger reference resolution leaves more of the arena visible.
+            float scale = Mathf.Min(Screen.width / 1600f, Screen.height / 900f);
             if (scale <= 0f) return;
 
             Matrix4x4 oldMatrix = GUI.matrix;
@@ -28,25 +29,27 @@ namespace EscapeLab2D
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1f));
             GUI.color = Color.white;
 
-            Fill(new Rect(16, 16, 344, 192), panel);
-            GUI.Label(new Rect(32, 25, 310, 28), "ESCAPE LAB 2D", title);
+            Fill(new Rect(20, 20, 340, 146), panel);
+            GUI.Label(new Rect(32, 28, 316, 25), "ESCAPE LAB 2D", title);
             DrawHearts(game);
-            GUI.Label(new Rect(32, 105, 300, 24),
+            GUI.Label(new Rect(32, 84, 316, 22),
                 $"Score  {game.Score}       Best  {game.BestScore}", label);
-            GUI.Label(new Rect(32, 133, 300, 22),
-                $"Energy cells  {game.CollectedCells}/{game.requiredCells}", small);
-            Fill(new Rect(32, 159, 312, 14), new Color(0.16f, 0.2f, 0.28f));
-            Fill(new Rect(34, 161, 308 * game.CollectionProgress, 10), accent);
-            GUI.Label(new Rect(32, 181, 312, 22),
+            GUI.Label(new Rect(32, 111, 108, 20),
+                $"Cells  {game.CollectedCells}/{game.requiredCells}", small);
+            Fill(new Rect(144, 114, 200, 12), new Color(0.16f, 0.2f, 0.28f));
+            Fill(new Rect(146, 116, 196 * game.CollectionProgress, 8), accent);
+            GUI.Label(new Rect(32, 138, 316, 20),
                 $"{game.CurrentDifficulty}  |  {Mathf.CeilToInt(game.SecondsLeft)}s  |  " +
                 (game.ExitOpen ? "EXIT OPEN" : "EXIT LOCKED"), small);
 
             if (!game.Finished && GUI.Button(new Rect(width - 146, 16, 130, 34),
                 game.Paused ? "Resume [P]" : "Pause [P]", button)) game.TogglePause();
 
-            Fill(new Rect(0, height - 34, width, 34), panel);
-            GUI.Label(new Rect(16, height - 29, width - 32, 25),
-                "WASD / arrows: move   |   Shift: sprint   |   P: pause   |   R: restart", small);
+            // Keep hints near the HUD: a zoomed fixed-resolution Game view can crop
+            // the bottom of the frame even when Screen.height reports the full render.
+            Fill(new Rect(20, 174, 340, 48), panel);
+            GUI.Label(new Rect(32, 180, 316, 36),
+                "WASD/arrows: move  |  Shift: sprint\nP: pause/resume  |  R: restart", small);
 
             if (game.Paused || game.Finished) DrawMenu(game, width, height);
             GUI.matrix = oldMatrix;
@@ -61,10 +64,10 @@ namespace EscapeLab2D
             for (int i = 0; i < visible; i++)
             {
                 GUI.color = i < game.Health ? new Color(1f, 0.3f, 0.4f) : new Color(0.25f, 0.28f, 0.35f);
-                GUI.DrawTexture(new Rect(32 + i * 27, 60, 24, 22), heart);
+                GUI.DrawTexture(new Rect(32 + i * 21, 59, 18, 17), heart);
             }
             GUI.color = Color.white;
-            GUI.Label(new Rect(32, 84, 300, 20), $"Health  {game.Health}/{game.MaxHealth}", small);
+            GUI.Label(new Rect(260, 57, 88, 20), $"{game.Health}/{game.MaxHealth} HP", small);
         }
 
         private void DrawMenu(GameManager game, float width, float height)
@@ -103,9 +106,9 @@ namespace EscapeLab2D
 
         private void CreateStyles()
         {
-            title = new GUIStyle(GUI.skin.label) { fontSize = 23, fontStyle = FontStyle.Bold };
-            label = new GUIStyle(GUI.skin.label) { fontSize = 17 };
-            small = new GUIStyle(GUI.skin.label) { fontSize = 14 };
+            title = new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold };
+            label = new GUIStyle(GUI.skin.label) { fontSize = 16 };
+            small = new GUIStyle(GUI.skin.label) { fontSize = 13 };
             button = new GUIStyle(GUI.skin.button) { fontSize = 15 };
             title.normal.textColor = label.normal.textColor = small.normal.textColor = Color.white;
         }

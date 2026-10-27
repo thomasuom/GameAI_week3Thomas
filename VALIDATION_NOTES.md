@@ -4,13 +4,15 @@ Baseline: laptop-unity-work, commit be6ab8b. Scope: PDF tasks 10–14.
 
 ## Passed
 
-- 19 C# checks run against the actual GameSession and GameManager code, with
+- 21 C# checks run against the actual GameSession and GameManager code, with
   test-only Unity service stand-ins. The HUD code also compiled with these
   stand-ins and passed an active/pause/end-state smoke check.
 - Behaviour checks cover normal/special-cell scoring, unlock/win conditions,
   health/pickups/poison, timeout, pause/resume, difficulty rules and persistence,
   best-score persistence across new managers, one-time unlock/win cues, and
   restart/cleanup restoring global time/audio state.
+- HUD draw bounds stay compact and inside six common game resolutions. Control
+  hints stay visible when a zoomed QHD view clips the bottom of the rendered frame.
 - Package manifest and lockfile agree, including the built-in audio module.
 - No duplicate asset GUIDs.
 - All 19 asset GUID references and four attached script references in the enabled

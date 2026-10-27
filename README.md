@@ -17,7 +17,7 @@ controls, difficulty rules, the code and the Unity Play-mode checklist.
 The project uses the built-in audio and IMGUI modules. No paid Unity AI credits,
 external UI package, runtime level generator or manual sound assignment is needed.
 
-Automated validation: 19 C# checks using test-only Unity stand-ins, plus saved
+Automated validation: 21 C# checks using test-only Unity stand-ins, plus saved
 scene/asset-reference checks. A live Unity Editor was unavailable, so actual
 Unity compilation and Play-mode testing remain to be done locally.
 
