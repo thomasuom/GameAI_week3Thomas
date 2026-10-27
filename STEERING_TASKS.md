@@ -127,10 +127,14 @@ This keeps Hunters apart; it does not implement task 17's surround/orbit positio
 
 ## Verification
 
-31 standalone C# checks passed against the real helper and controller code with
+32 standalone C# checks passed against the real helper and controller code with
 test-only Unity/physics stand-ins. They cover direct seek, arrival simulation,
 wandering bounds/retries, one-ray priority, contact sliding, full-distance sweeps,
 multi-lap patrol, separation, active registration and Level 3 pause gating.
+
+Hunters use local registration numbers for overlap tie-breaking and turn choice.
+There is no dependency on Unity's obsolete GetInstanceID API. The test stand-in
+rejects that API as a compilation error, matching the project's Unity version.
 
 Run with a .NET 8 SDK:
 

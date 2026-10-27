@@ -1,6 +1,6 @@
 # Level 3 validation
 
-The subsequent steering stage adds 31 helper/controller checks and a configured
+The subsequent steering stage adds 32 helper/controller checks and a configured
 wall layer, arrival target and patrol points. See STEERING_TASKS.md for scope and
 the required Unity Play-mode checks. The following records the Level 3 baseline.
 

@@ -202,6 +202,14 @@ internal static class Program
             Equal(0,Physics2D.Rays);TestScene.Manager.Playing=true;Step(h);
             True(h.HasWanderTarget);
         });
+        Check("16: re-enabled hunters retain distinct separation identities", () =>
+        {
+            var a=Hunter(HunterBehaviour.BasicSeek);var b=Hunter(HunterBehaviour.BasicSeek);
+            Set(a,"player",Point(10,0));Set(b,"player",Point(10,0));
+            Set(a,"separation",true);Set(b,"separation",true);
+            Call(a,"OnDisable");Call(a,"OnEnable");Step(b);Step(a);
+            True(b.transform.position.x<0);True(a.transform.position.x>0);
+        });
         Check("the inherited near-player response is retained in ExistingDetection mode", () =>
         {
             var h=Hunter(HunterBehaviour.ExistingDetection);Set(h,"player",Point(1,0));

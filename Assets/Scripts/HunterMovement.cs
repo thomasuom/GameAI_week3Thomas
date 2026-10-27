@@ -40,6 +40,8 @@ public class HunterMovement : MonoBehaviour
 
     private const float WallClearance = 0.04f;
     private static readonly List<HunterMovement> hunters = new List<HunterMovement>();
+    private static int nextHunterId;
+    private int hunterId;
     private readonly RaycastHit2D[] wallHits = new RaycastHit2D[16];
     private readonly Collider2D[] overlaps = new Collider2D[8];
     private Collider2D hunterCollider;
@@ -69,7 +71,12 @@ public class HunterMovement : MonoBehaviour
 
     private void OnEnable()
     {
-        if (!hunters.Contains(this)) hunters.Add(this);
+        if (!hunters.Contains(this))
+        {
+            // Only a local ordering is needed to break overlaps and choose turns.
+            hunterId = ++nextHunterId;
+            hunters.Add(this);
+        }
     }
 
     private void OnDisable()
@@ -202,7 +209,7 @@ public class HunterMovement : MonoBehaviour
         {
             if (other == null || other == this) continue;
             repulsion += SteeringMath.SeparationOffset(transform.position, other.transform.position,
-                separationRadius, GetInstanceID(), other.GetInstanceID());
+                separationRadius, hunterId, other.hunterId);
         }
         return Vector2.ClampMagnitude(repulsion, 1f) * maxSpeed;
     }
@@ -222,7 +229,7 @@ public class HunterMovement : MonoBehaviour
                 Vector2 tangent = new Vector2(-hit.normal.y, hit.normal.x);
                 float dot = Vector2.Dot(desired, tangent);
                 avoidanceSide = Mathf.Abs(dot) > 0.01f ? Mathf.Sign(dot) :
-                    (GetInstanceID() % 2 == 0 ? 1f : -1f);
+                    (hunterId % 2 == 0 ? 1f : -1f);
             }
             avoidedWall = hit.collider;
             avoidanceNormal = hit.normal;

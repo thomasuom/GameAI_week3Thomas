@@ -8,6 +8,7 @@ namespace UnityEngine
     {
         private static int nextId;
         private readonly int id = ++nextId;
+        [Obsolete("Use GetEntityId instead. GetInstanceID is unsupported by the target Unity version.", true)]
         public int GetInstanceID() { return id; }
         public static T FindAnyObjectByType<T>() where T : class { return TestScene.Manager as T; }
     }
